@@ -109,22 +109,15 @@ const EventSchema = new Schema<IEvent>(
   }
 );
 
-// Pre-save hook for slug generation and data normalization
-// Use an async hook and explicit `this` typing to satisfy TypeScript
-EventSchema.pre('save', async function (this: IEvent) {
+// Pre-save hook for slug generation and data normalization (Mongoose 9: async, no next)
+EventSchema.pre('save', async function () {
   const event = this as IEvent;
-
-  // Generate slug only if title changed or document is new
   if (event.isModified('title') || event.isNew) {
     event.slug = generateSlug(event.title);
   }
-
-  // Normalize date to ISO format if it's not already
   if (event.isModified('date')) {
     event.date = normalizeDate(event.date);
   }
-
-  // Normalize time format (HH:MM)
   if (event.isModified('time')) {
     event.time = normalizeTime(event.time);
   }
@@ -177,8 +170,7 @@ function normalizeTime(timeString: string): string {
   return `${hours.toString().padStart(2, '0')}:${minutes}`;
 }
 
-// Create unique index on slug for better performance
-EventSchema.index({ slug: 1 }, { unique: true });
+// slug already has unique: true in schema
 
 // Create compound index for common queries
 EventSchema.index({ date: 1, mode: 1 });
@@ -186,6 +178,3 @@ EventSchema.index({ date: 1, mode: 1 });
 const Event = models.Event || model<IEvent>('Event', EventSchema);
 
 export default Event;
-
-
-

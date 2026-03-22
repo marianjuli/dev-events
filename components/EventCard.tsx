@@ -4,15 +4,26 @@ import Image from "next/image";
 interface Props {
   title: string;
   image: string;
-  slug: string;
+  slug?: string;
   location: string;
   date: string;
   time: string;
 }
 
+function toSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 const EventCard = ({ title, image, slug, location, date, time }: Props) => {
+  const hrefSlug = toSlug(slug || title);
   return (
-    <Link href={`/events/${slug}`} id="event-card">
+    <Link href={`/events/${hrefSlug}`} id="event-card">
       <Image
         src={image}
         alt={title}
